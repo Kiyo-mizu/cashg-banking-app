@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+  <form method="post" class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
+    {% csrf_token %}
+    <h2 class="text-2xl font-semibold text-center mb-6">Create an Account</h2>
+
+    {% if messages %}
+      <div class="mb-4">
+        {% for message in messages %}
+          <div class="text-sm text-red-600">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="mb-4">
+      <label for="username" class="block text-gray-700 mb-1">Username</label>
+      <input type="text" name="username" id="username" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+    </div>
+
+    <div class="mb-4">
+      <label for="email" class="block text-gray-700 mb-1">Email</label>
+      <input type="email" name="email" id="email" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+    </div>
+
+    <div class="mb-4">
+      <label for="password1" class="block text-gray-700 mb-1">Password</label>
+      <input type="password" name="password1" id="password1" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+    </div>
+
+    <div class="mb-6">
+      <label for="password2" class="block text-gray-700 mb-1">Confirm Password</label>
+      <input type="password" name="password2" id="password2" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+    </div>
+
+    <div class="mb-6">
+        <label for="account_type" class="block text-gray-700 mb-1">Account Type</label>
+        <select name="account_type" id="account_type" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+            <option value="SAVINGS">Savings</option>
+            <option value="CHECKING">Checking</option>
+        </select>
+      </div>
+      
+
+    <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300">Sign Up</button>
+
+    <p class="mt-4 text-sm text-center text-gray-600">
+      Already have an account?
+      <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Login here</a>
+    </p>
+  </form>
+
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-4xl mx-auto py-10 px-6">
+    
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Welcome, {{ user.username }}</h1>
+      <a href="{% url 'logout' %}" class="text-red-500 hover:underline">Logout</a>
+    </div>
+
+    <!-- Account Summary -->
+    <div class="bg-white p-6 rounded-lg shadow mb-6">
+      <h2 class="text-lg font-semibold mb-2">Account Summary</h2>
+      <p><strong>Account Number:</strong> {{ account.account_number }}</p>
+      <p><strong>Balance:</strong> ₱{{ account.balance }}</p>
+      <p><strong>Account Type:</strong> {{ account.account_type }}</p>
+      <p><strong>Account Created:</strong> {{ account.created_at }}</p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <a href="{% url 'deposit' %}" class="bg-blue-500 text-white p-4 rounded-lg text-center hover:bg-blue-600">Deposit</a>
+        <a href="{% url 'withdraw' %}" class="bg-yellow-500 text-white p-4 rounded-lg text-center hover:bg-yellow-600">Withdraw</a>
+        <a href="{% url 'transfer' %}" class="bg-green-500 text-white p-4 rounded-lg text-center hover:bg-green-600">Transfer</a>
+        <a href="{% url 'history' %}" class="bg-purple-500 text-white p-4 rounded-lg text-center hover:bg-purple-600">History</a>
+      </div>
+  
+      <!-- Recent Transactions -->
+      <div class="bg-white p-6 rounded-lg shadow">
+        <h2 class="text-lg font-semibold mb-4">Recent Transactions</h2>
+        {% if transactions %}
+          <ul class="space-y-2">
+            {% for tx in transactions %}
+              <li class="flex justify-between">
+                <span>{{ tx.timestamp }}</span>
+                <span class="font-semibold">₱{{ tx.amount }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-500">No recent transactions.</p>
+        {% endif %}
+      </div>
+  
+  </div>
+</body>
+</html>
