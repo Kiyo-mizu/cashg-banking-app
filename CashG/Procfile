@@ -1,1 +1,1 @@
-web: gunicorn cashg.wsgi:application
+web: gunicorn CashG.wsgi:application
