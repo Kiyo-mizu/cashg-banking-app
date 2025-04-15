@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-xkt%ehh512yftes3msk-#unfx-rt2&80sfid7yx+i%uxplvfs!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://cashg-banking-app.onrender.com']
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
