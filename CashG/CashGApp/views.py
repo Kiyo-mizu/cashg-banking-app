@@ -336,20 +336,29 @@ def history(request):
 
 @login_required
 def profile(request):
-    try:
-        account = Account.objects.get(user=request.user)
-        user_profile = Profile.objects.get(user=request.user)
-    except (Account.DoesNotExist, Profile.DoesNotExist):
-        messages.error(request, "Profile not found.")
-        return redirect('dashboard')
-
+    # Get or create Account
+    account, created = Account.objects.get_or_create(
+        user=request.user,
+        defaults={
+            'account_number': f"ACC{request.user.id:06d}",
+            'account_type': 'Savings',
+            'balance': 0.00
+        }
+    )
+    
+    # Get or create Profile
+    user_profile, created = Profile.objects.get_or_create(user=request.user)
+    
     if request.method == 'POST':
-        # Handle profile updates here if needed
         messages.success(request, "Profile updated successfully.")
         return redirect('profile')
-
+    
     context = {
         'account': account,
         'profile': user_profile,
+        'total_deposits': 0,
+        'total_withdrawals': 0,
+        'total_transfers': 0,
+        'total_transactions': 0,
     }
     return render(request, 'profile.html', context)
