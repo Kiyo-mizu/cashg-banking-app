@@ -114,37 +114,50 @@ def signup(request):
     return render(request, 'sign_up.html')
 
 @login_required
-@csrf_protect
+@csrf_protect  
 def deposit(request):
     try:
-        account = Account.objects.select_for_update().get(user=request.user)
+        # For GET requests, just get the account normally
+        account = Account.objects.get(user=request.user)
     except Account.DoesNotExist:
         messages.error(request, "Account not found.")
         return redirect('dashboard')
-
+    
     if request.method == 'POST':
         amount_str = request.POST.get('amount')
+        description = request.POST.get('description', '')  # Get optional description
+        
         try:
             amount = Decimal(amount_str)
             if amount >= 1.00:
+                # Use transaction.atomic() for the POST operation
                 with transaction.atomic():
+                    # Now use select_for_update inside the transaction
+                    account = Account.objects.select_for_update().get(user=request.user)
                     account.balance += amount
                     account.save()
+                    
+                    # Create transaction record with custom description if provided
+                    transaction_description = description if description.strip() else f'Deposit to {account.account_type} account'
+                    
                     Transaction.objects.create(
                         account=account,
                         amount=amount,
                         transaction_type='DEPOSIT',
-                        description=f'Deposit to {account.account_type} account'
+                        description=transaction_description
                     )
+                
                 messages.success(request, f"Successfully deposited ₱{amount:,.2f}.")
                 return redirect('dashboard')
             else:
-                messages.error(request, "Amount must be at least ₱1.")
+                messages.error(request, "Amount must be at least ₱1.00.")
         except (ValueError, TypeError, Decimal.InvalidOperation):
-            messages.error(request, "Invalid amount format.")
-
+            messages.error(request, "Invalid amount format. Please enter a valid number.")
+        except Account.DoesNotExist:
+            messages.error(request, "Account not found during transaction.")
+            return redirect('dashboard')
+    
     return render(request, 'deposit.html', {'account': account})
-
 
 @login_required
 @csrf_protect
