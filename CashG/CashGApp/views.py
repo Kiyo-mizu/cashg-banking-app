@@ -10,6 +10,7 @@ import random
 
 from django.views.decorators.csrf import csrf_protect
 
+
 @csrf_protect
 def Login(request):
     if request.method == 'POST':
@@ -30,6 +31,11 @@ def Login(request):
 
     return render(request, 'login.html')
 
+
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html')
+    
 @csrf_protect
 @transaction.atomic
 def signup(request):
