@@ -1,54 +1,33 @@
 {% extends 'base.html' %}
 
-{% block title %}Sign Up{% endblock %}
-
 {% block content %}
-<form method="post" class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-  {% csrf_token %}
-  <h2 class="text-2xl font-semibold text-center mb-6">Create an Account</h2>
+<div class="container mt-5">
+    <h2>Create an Account</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
 
-  <div class="mb-4">
-    <label for="username" class="block text-gray-700 mb-1">Username</label>
-    <input type="text" name="username" id="username"
-           class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-  </div>
-
-  <div class="mb-4">
-    <label for="email" class="block text-gray-700 mb-1">Email</label>
-    <input type="email" name="email" id="email"
-           class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-  </div>
-
-  <div class="mb-4">
-    <label for="password1" class="block text-gray-700 mb-1">Password</label>
-    <input type="password" name="password1" id="password1" autocomplete="new-password"
-           class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-    <small class="text-sm text-gray-500">Minimum 8 characters</small>
-  </div>
-
-  <div class="mb-4">
-    <label for="password2" class="block text-gray-700 mb-1">Confirm Password</label>
-    <input type="password" name="password2" id="password2" autocomplete="new-password"
-           class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-  </div>
-
-  <div class="mb-6">
-    <label for="account_type" class="block text-gray-700 mb-1">Account Type</label>
-    <select name="account_type" id="account_type"
-            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
-      <option value="SAVINGS">Savings</option>
-      <option value="CHECKING">Checking</option>
-    </select>
-  </div>
-
-  <button type="submit"
-          class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition duration-300">
-    Sign Up
-  </button>
-
-  <p class="text-center text-sm text-gray-600 mt-4">
-    Already have an account?
-    <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Login here</a>
-  </p>
-</form>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="account_type" class="form-label">Account Type</label>
+            <select name="account_type" class="form-control" required>
+                <option value="">-- Select --</option>
+                <option value="Client">Client</option>
+                <option value="Admin">Admin</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+</div>
 {% endblock %}
