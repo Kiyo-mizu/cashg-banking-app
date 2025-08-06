@@ -59,7 +59,6 @@ def signup(request):
         Profile.objects.create(user=user, account_type=account_type)
         messages.success(request, "Account created successfully. You can now login.")
         return redirect('login')
-
     return render(request, 'sign_up.html')
 
 @login_required
