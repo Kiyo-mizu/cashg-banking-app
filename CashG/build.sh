@@ -6,7 +6,7 @@ set -o errexit
 pip install -r requirements.txt
 
 # Make migrations (in case they don't exist)
-python manage.py makemigrations
+python manage.py makemigrations CashGApp
 
 # Run database migrations
 python manage.py migrate
