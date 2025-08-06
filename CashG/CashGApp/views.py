@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 import random
 from django.views.decorators.csrf import csrf_protect
+from django.db import transaction
 from django.http import HttpResponse
 
 
