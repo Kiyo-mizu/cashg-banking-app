@@ -31,6 +31,9 @@ def Login(request):
 
     return render(request, 'login.html')
 
+@login_required
+def dashboard(request):
+    return render(request, 'dashboard.html')
 
 @csrf_protect
 @transaction.atomic
