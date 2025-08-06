@@ -223,75 +223,100 @@ def withdraw(request):
                 return redirect('dashboard')
 
 
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_protect
+from django.db import transaction
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+from decimal import Decimal
+
 @login_required
 @csrf_protect
 def transfer(request):
+    # Get account without select_for_update for GET requests
     try:
-        account = Account.objects.select_for_update().get(user=request.user)
+        account = Account.objects.get(user=request.user)
     except Account.DoesNotExist:
         messages.error(request, "Account not found.")
         return redirect('dashboard')
-
+    
     if request.method == 'POST':
         recipient_username = request.POST.get('recipient')
         amount_str = request.POST.get('amount')
         note = request.POST.get('note', '')
-
+        
         try:
             amount = Decimal(amount_str)
         except (ValueError, TypeError, Decimal.InvalidOperation):
             messages.error(request, "Invalid amount.")
             return render(request, 'transfer.html', {'account': account})
-
+        
+        # Basic validation before entering transaction
+        if not (200 <= amount <= 50000):
+            messages.error(request, "Transfer amount must be between ₱200 and ₱50,000.")
+            return render(request, 'transfer.html', {'account': account})
+        
         try:
             recipient_user = User.objects.get(username=recipient_username)
-            recipient_account = Account.objects.select_for_update().get(user=recipient_user)
         except User.DoesNotExist:
             messages.error(request, "Recipient user not found.")
             return render(request, 'transfer.html', {'account': account})
-        except Account.DoesNotExist:
-            messages.error(request, "Recipient account not found.")
-            return render(request, 'transfer.html', {'account': account})
-
+        
         if recipient_user == request.user:
             messages.error(request, "Cannot transfer to your own account.")
-        elif amount > account.balance:
-            messages.error(request, "Insufficient balance.")
-        elif not (200 <= amount <= 50000):
-            messages.error(request, "Transfer amount must be between ₱200 and ₱50,000.")
-        else:
+            return render(request, 'transfer.html', {'account': account})
+        
+        # Use atomic transaction with select_for_update
+        try:
             with transaction.atomic():
-                account.balance -= amount
+                # Lock both accounts to prevent race conditions
+                sender_account = Account.objects.select_for_update().get(user=request.user)
+                try:
+                    recipient_account = Account.objects.select_for_update().get(user=recipient_user)
+                except Account.DoesNotExist:
+                    messages.error(request, "Recipient account not found.")
+                    return render(request, 'transfer.html', {'account': account})
+                
+                # Check balance after locking
+                if amount > sender_account.balance:
+                    messages.error(request, "Insufficient balance.")
+                    return render(request, 'transfer.html', {'account': sender_account})
+                
+                # Perform the transfer
+                sender_account.balance -= amount
                 recipient_account.balance += amount
-                account.save()
+                sender_account.save()
                 recipient_account.save()
-
+                
+                # Create transaction records
                 Transaction.objects.create(
-                    account=account,
+                    account=sender_account,
                     amount=amount,
                     description=f'Transfer to {recipient_username}: {note}' if note else f'Transfer to {recipient_username}',
                     transaction_type='TRANSFER'
                 )
-
                 Transaction.objects.create(
                     account=recipient_account,
                     amount=amount,
                     description=f'Received from {request.user.username}: {note}' if note else f'Received from {request.user.username}',
                     transaction_type='RECEIVED'
                 )
-
                 Transfer.objects.create(
-                    sender_account=account,
+                    sender_account=sender_account,
                     recipient_account=recipient_account,
                     amount=amount,
                     note=note
                 )
-
+                
             messages.success(request, f"Successfully transferred ₱{amount:,.2f} to {recipient_username}.")
             return redirect('dashboard')
-
+            
+        except Exception as e:
+            messages.error(request, "Transfer failed. Please try again.")
+            return render(request, 'transfer.html', {'account': account})
+    
     return render(request, 'transfer.html', {'account': account})
-
 
 @login_required
 def history(request):
