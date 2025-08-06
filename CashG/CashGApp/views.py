@@ -38,72 +38,27 @@ def dashboard(request):
 @csrf_protect
 @transaction.atomic
 def signup(request):
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        password1 = request.POST.get('password1')
-        password2 = request.POST.get('password2')
+     if request.method == 'POST':
+        username = request.POST.get('username')
         account_type = request.POST.get('account_type')
+        password = request.POST.get('password')
 
-        # Basic validation
-        if not username or not email or not password1 or not password2:
-            messages.error(request, 'All fields are required.')
-            return render(request, 'sign_up.html')
-        
-        if password1 != password2:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'sign_up.html')
+        if not all([username, account_type, password]):
+            messages.error(request, "All fields are required.")
+            return redirect('signup')
 
-        if len(password1) < 8:
-            messages.error(request, 'Password must be at least 8 characters.')
-            return render(request, 'sign_up.html')
+        if account_type not in ['Admin', 'Client']:
+            messages.error(request, "Invalid account type selected.")
+            return redirect('signup')
 
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'Username is already taken.')
-            return render(request, 'sign_up.html')
+            messages.error(request, "Username already exists.")
+            return redirect('signup')
 
-        if User.objects.filter(email=email).exists():
-            messages.error(request, 'Email is already in use.')
-            return render(request, 'sign_up.html')
-
-        if account_type not in ['Savings', 'Current']:  # Adjust this to your model choices
-            messages.error(request, 'Invalid account type selected.')
-            return render(request, 'sign_up.html')
-
-        try:
-            # Create user
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password1
-            )
-
-            # Generate unique account number
-            for _ in range(5):  # Try up to 5 times
-                new_account_number = ''.join([str(random.randint(0, 9)) for _ in range(12)])
-                formatted_account_number = f'{new_account_number[:4]}-{new_account_number[4:8]}-{new_account_number[8:]}'
-                if not Account.objects.filter(account_number=formatted_account_number).exists():
-                    break
-            else:
-                raise ValueError("Failed to generate a unique account number.")
-
-            # Create account
-            Account.objects.create(
-                user=user,
-                account_number=formatted_account_number,
-                account_type=account_type,
-                balance=Decimal('0.00')
-            )
-
-            messages.success(request, 'Account created successfully! Please login.')
-            return redirect('login')
-
-        except IntegrityError as db_error:
-            messages.error(request, "Database error occurred during account creation.")
-            print(f"[DB Error] {db_error}")
-        except Exception as e:
-            messages.error(request, "Account creation failed. Please try again.")
-            print(f"[Signup Exception] {e}")
+        user = User.objects.create_user(username=username, password=password)
+        Profile.objects.create(user=user, account_type=account_type)
+        messages.success(request, "Account created successfully. You can now login.")
+        return redirect('login')
 
     return render(request, 'sign_up.html')
 
