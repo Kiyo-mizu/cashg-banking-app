@@ -3,7 +3,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from .models import *
 from decimal import Decimal
+from django.contrib.auth.models import User 
+from django.contrib.auth.decorators import login_required  
 import random
+
 def Login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -26,7 +29,7 @@ def Dashboard(request):
     transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:5]
     return render(request, 'dashboard.html', {'account': account, 'transactions': transactions})
 
-
+@login_required 
 def deposit(request):
     account = Account.objects.get(user=request.user)
 
