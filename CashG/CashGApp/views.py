@@ -5,6 +5,7 @@ from .models import *
 from decimal import Decimal
 from django.contrib.auth.models import User 
 from django.contrib.auth.decorators import login_required  
+from django.db import transaction
 import random
 
 def Login(request):
@@ -23,15 +24,24 @@ def Login(request):
 
     return render(request, 'login.html')
 
-
+@login_required
 def Dashboard(request):
-    account = Account.objects.get(user=request.user)
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found. Please contact support.")
+        return redirect('login')
+    
     transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:5]
     return render(request, 'dashboard.html', {'account': account, 'transactions': transactions})
 
 @login_required 
 def deposit(request):
-    account = Account.objects.get(user=request.user)
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found.")
+        return redirect('dashboard')
 
     if request.method == 'POST':
         amount_str = request.POST.get('amount')
@@ -54,9 +64,14 @@ def deposit(request):
             messages.error(request, "Invalid input. Please enter a valid numeric amount.")
     return render(request, 'deposit.html', {'account': account})
 
-
+@login_required
 def withdraw(request):
-    account = Account.objects.get(user=request.user)
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found.")
+        return redirect('dashboard')
+        
     if request.method == 'POST':
         amount_str = request.POST.get('amount')
         try:
@@ -83,9 +98,13 @@ def withdraw(request):
 
     return render(request, 'withdraw.html')
 
-
+@login_required
 def transfer(request):
-    account = Account.objects.get(user=request.user)
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found.")
+        return redirect('dashboard')
 
     if request.method == 'POST':
         recipient_username = request.POST.get('recipient')
@@ -103,6 +122,7 @@ def transfer(request):
         except:
             messages.error(request, 'Recipient account not found. Please check the username and try again.')
             return render(request, 'transfer.html')
+            
         if account.user == recipient_account.user:
             messages.error(request,'You cant transfer to yourself')
         else:
@@ -135,15 +155,18 @@ def transfer(request):
 
     return render(request, 'transfer.html')
 
-
+@login_required
 def history(request):
-    account = Account.objects.get(user=request.user)
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found.")
+        return redirect('dashboard')
+        
     transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:10]
     return render(request, 'transactions.html', {'transactions': transactions})
 
-
-
-
+@transaction.atomic
 def signup(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -187,16 +210,15 @@ def signup(request):
                     user=user,
                     account_number=formatted_account_number,
                     account_type=account_type,
-                    balance=0.00  # Make sure this is a decimal/float
+                    balance=Decimal('0.00')  # Use Decimal explicitly
                 )
                 
                 messages.success(request, 'Account created successfully! Please login.')
                 return redirect('login')
                 
             except Exception as e:
-                # If account creation fails, delete the user to avoid orphaned users
-                if 'user' in locals():
-                    user.delete()
+                # The @transaction.atomic decorator will automatically rollback if there's an error
                 messages.error(request, f'Account creation failed. Please try again. Error: {str(e)}')
+                print(f"Signup error: {str(e)}")  # This will show in logs
 
     return render(request, 'sign_up.html')
