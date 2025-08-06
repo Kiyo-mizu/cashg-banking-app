@@ -146,16 +146,13 @@ def history(request):
 
 def signup(request):
     if request.method == 'POST':
-        num_size = 12
-        generated_number = []
         username = request.POST.get('username')
         email = request.POST.get('email')
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         account_type = request.POST.get('account_type')
 
-        for i in range(num_size):
-            generated_number.append(random.randint(0,9))
+        # Validation
         if password1 != password2:
             messages.error(request, 'Passwords do not match.')
         elif User.objects.filter(username=username).exists():
@@ -163,14 +160,43 @@ def signup(request):
         elif User.objects.filter(email=email).exists():
             messages.error(request, 'Email is already in use.')
         else:
-            user = User.objects.create_user(
-                username=username,
-                email=email,
-                password=password1
-            )
-            new_account_number = ''.join(str(digit) for digit in generated_number)
-
-            Account.objects.create(user=user,account_number = f'{new_account_number[0:4]}-{new_account_number[4:8]}-{new_account_number[8:]}',account_type = account_type , balance=0)
-            return redirect('login')
+            try:
+                # Create user
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password1
+                )
+                
+                # Generate unique account number
+                while True:
+                    num_size = 12
+                    generated_number = []
+                    for i in range(num_size):
+                        generated_number.append(random.randint(0, 9))
+                    
+                    new_account_number = ''.join(str(digit) for digit in generated_number)
+                    formatted_account_number = f'{new_account_number[0:4]}-{new_account_number[4:8]}-{new_account_number[8:]}'
+                    
+                    # Check if account number already exists
+                    if not Account.objects.filter(account_number=formatted_account_number).exists():
+                        break
+                
+                # Create account with all required fields
+                Account.objects.create(
+                    user=user,
+                    account_number=formatted_account_number,
+                    account_type=account_type,
+                    balance=0.00  # Make sure this is a decimal/float
+                )
+                
+                messages.success(request, 'Account created successfully! Please login.')
+                return redirect('login')
+                
+            except Exception as e:
+                # If account creation fails, delete the user to avoid orphaned users
+                if 'user' in locals():
+                    user.delete()
+                messages.error(request, f'Account creation failed. Please try again. Error: {str(e)}')
 
     return render(request, 'sign_up.html')
