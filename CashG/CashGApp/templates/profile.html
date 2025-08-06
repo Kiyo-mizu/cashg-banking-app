@@ -1,170 +1,293 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - CashG Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary-600">
+                            <i class="fas fa-university mr-2"></i>CashG Bank
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">
+                        <i class="fas fa-user mr-2"></i>{{ user.username }}
+                    </span>
+                    <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-{% block title %}Profile - CashG Bank{% endblock %}
+    <!-- Sidebar Navigation -->
+    <div class="flex">
+        <div class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-4">
+                <nav class="space-y-2">
+                    <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+                    </a>
+                    <a href="{% url 'deposit' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-plus-circle mr-3"></i>Deposit
+                    </a>
+                    <a href="{% url 'withdraw' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-minus-circle mr-3"></i>Withdraw
+                    </a>
+                    <a href="{% url 'transfer' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-exchange-alt mr-3"></i>Transfer
+                    </a>
+                    <a href="{% url 'history' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-history mr-3"></i>Transaction History
+                    </a>
+                    <a href="{% url 'profile' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200 bg-primary-50 text-primary-600">
+                        <i class="fas fa-user-cog mr-3"></i>Profile
+                    </a>
+                </nav>
+            </div>
+        </div>
 
-{% block content %}
-<div class="space-y-6">
-    <!-- Header -->
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <div class="flex items-center">
-            <i class="fas fa-user-circle text-4xl text-primary-500 mr-4"></i>
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">Profile Information</h1>
-                <p class="text-gray-600">Manage your account details and preferences</p>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} border px-4 py-3 rounded-lg mb-2 flex items-center">
+                            <i class="{% if message.tags == 'error' %}fas fa-exclamation-circle{% else %}fas fa-check-circle{% endif %} mr-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="max-w-4xl mx-auto space-y-6">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-xl p-6 text-white">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-user-circle text-4xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h1 class="text-3xl font-bold">My Profile</h1>
+                            <p class="text-indigo-100">Manage your account information and settings</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Personal Information -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-user mr-2 text-primary-500"></i>Personal Information
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Username</p>
+                                    <p class="font-semibold text-gray-800">{{ user.username }}</p>
+                                </div>
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Email</p>
+                                    <p class="font-semibold text-gray-800">{{ user.email|default:"Not provided" }}</p>
+                                </div>
+                                <i class="fas fa-envelope text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Date Joined</p>
+                                    <p class="font-semibold text-gray-800">{{ user.date_joined|date:"M d, Y" }}</p>
+                                </div>
+                                <i class="fas fa-calendar text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Last Login</p>
+                                    <p class="font-semibold text-gray-800">{{ user.last_login|date:"M d, Y H:i"|default:"Never" }}</p>
+                                </div>
+                                <i class="fas fa-clock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Information -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                            <i class="fas fa-university mr-2 text-primary-500"></i>Account Information
+                        </h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Account Number</p>
+                                    <p class="font-mono font-semibold text-gray-800">{{ account.account_number }}</p>
+                                </div>
+                                <i class="fas fa-credit-card text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Account Type</p>
+                                    <p class="font-semibold text-gray-800">{{ account.account_type }}</p>
+                                </div>
+                                <i class="fas fa-users text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Current Balance</p>
+                                    <p class="font-semibold text-primary-600 text-lg">₱{{ account.balance|floatformat:2 }}</p>
+                                </div>
+                                <i class="fas fa-wallet text-gray-400"></i>
+                            </div>
+
+                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm text-gray-600">Account Status</p>
+                                    <p class="font-semibold text-green-600">
+                                        <i class="fas fa-check-circle mr-1"></i>Active
+                                    </p>
+                                </div>
+                                <i class="fas fa-shield-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Statistics -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-chart-bar mr-2 text-primary-500"></i>Account Statistics
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                            <i class="fas fa-plus-circle text-2xl text-green-600 mb-2"></i>
+                            <p class="text-sm text-green-700">Total Deposits</p>
+                            <p class="text-xl font-bold text-green-800">₱{{ total_deposits|floatformat:2 }}</p>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-red-50 rounded-lg border border-red-200">
+                            <i class="fas fa-minus-circle text-2xl text-red-600 mb-2"></i>
+                            <p class="text-sm text-red-700">Total Withdrawals</p>
+                            <p class="text-xl font-bold text-red-800">₱{{ total_withdrawals|floatformat:2 }}</p>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <i class="fas fa-exchange-alt text-2xl text-blue-600 mb-2"></i>
+                            <p class="text-sm text-blue-700">Total Transfers</p>
+                            <p class="text-xl font-bold text-blue-800">₱{{ total_transfers|floatformat:2 }}</p>
+                        </div>
+                        
+                        <div class="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                            <i class="fas fa-history text-2xl text-purple-600 mb-2"></i>
+                            <p class="text-sm text-purple-700">Total Transactions</p>
+                            <p class="text-xl font-bold text-purple-800">{{ total_transactions }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-primary-500"></i>Quick Actions
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <a href="{% url 'deposit' %}" class="flex items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg border border-green-200 transition duration-200">
+                            <i class="fas fa-plus-circle text-2xl text-green-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold text-green-800">Make Deposit</p>
+                                <p class="text-sm text-green-600">Add money to your account</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'withdraw' %}" class="flex items-center p-4 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition duration-200">
+                            <i class="fas fa-minus-circle text-2xl text-red-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold text-red-800">Make Withdrawal</p>
+                                <p class="text-sm text-red-600">Take money from your account</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'history' %}" class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition duration-200">
+                            <i class="fas fa-history text-2xl text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="font-semibold text-blue-800">View History</p>
+                                <p class="text-sm text-blue-600">Check transaction history</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Security Information -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-shield-alt mr-2 text-primary-500"></i>Security Information
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-exclamation-triangle text-yellow-600 mr-2"></i>
+                                <h3 class="font-semibold text-yellow-800">Account Security</h3>
+                            </div>
+                            <p class="text-sm text-yellow-700">Your account is protected with industry-standard security measures.</p>
+                        </div>
+                        
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                                <h3 class="font-semibold text-green-800">Account Status</h3>
+                            </div>
+                            <p class="text-sm text-green-700">Your account is active and in good standing.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Personal Information -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800">
-                    <i class="fas fa-user mr-2 text-primary-500"></i>Personal Information
-                </h2>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Username</p>
-                        <p class="font-semibold text-gray-800">{{ user.username }}</p>
-                    </div>
-                    <i class="fas fa-user text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Email</p>
-                        <p class="font-semibold text-gray-800">{{ user.email|default:"Not provided" }}</p>
-                    </div>
-                    <i class="fas fa-envelope text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Account Type</p>
-                        <p class="font-semibold text-gray-800">{{ profile.account_type }}</p>
-                    </div>
-                    <i class="fas fa-users text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Date Joined</p>
-                        <p class="font-semibold text-gray-800">{{ user.date_joined|date:"F d, Y" }}</p>
-                    </div>
-                    <i class="fas fa-calendar text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3">
-                    <div>
-                        <p class="text-sm text-gray-600">Last Login</p>
-                        <p class="font-semibold text-gray-800">{{ user.last_login|date:"F d, Y at g:i A"|default:"Never" }}</p>
-                    </div>
-                    <i class="fas fa-clock text-gray-400"></i>
-                </div>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-500 text-sm">
+                <p>&copy; 2024 CashG Bank. All rights reserved.</p>
             </div>
         </div>
-
-        <!-- Account Information -->
-        <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-            <div class="p-6 border-b border-gray-200">
-                <h2 class="text-xl font-semibold text-gray-800">
-                    <i class="fas fa-university mr-2 text-primary-500"></i>Account Information
-                </h2>
-            </div>
-            <div class="p-6 space-y-4">
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Account Number</p>
-                        <p class="font-mono font-semibold text-gray-800">{{ account.account_number }}</p>
-                    </div>
-                    <i class="fas fa-credit-card text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Account Type</p>
-                        <p class="font-semibold text-gray-800">{{ account.account_type }}</p>
-                    </div>
-                    <i class="fas fa-university text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Current Balance</p>
-                        <p class="font-semibold text-primary-600 text-xl">₱{{ account.balance|floatformat:2 }}</p>
-                    </div>
-                    <i class="fas fa-wallet text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3 border-b border-gray-100">
-                    <div>
-                        <p class="text-sm text-gray-600">Account Status</p>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            <i class="fas fa-check-circle mr-1"></i>Active
-                        </span>
-                    </div>
-                    <i class="fas fa-shield-alt text-gray-400"></i>
-                </div>
-                
-                <div class="flex items-center justify-between py-3">
-                    <div>
-                        <p class="text-sm text-gray-600">Account Created</p>
-                        <p class="font-semibold text-gray-800">{{ account.created_at|date:"F d, Y" }}</p>
-                    </div>
-                    <i class="fas fa-calendar-plus text-gray-400"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">
-            <i class="fas fa-bolt mr-2 text-primary-500"></i>Quick Actions
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="{% url 'deposit' %}" class="bg-green-500 hover:bg-green-600 text-white p-4 rounded-lg text-center transition duration-200 transform hover:scale-105">
-                <i class="fas fa-plus-circle text-2xl mb-2"></i>
-                <p class="font-semibold">Deposit</p>
-                <p class="text-sm opacity-90">Add money</p>
-            </a>
-            
-            <a href="{% url 'withdraw' %}" class="bg-red-500 hover:bg-red-600 text-white p-4 rounded-lg text-center transition duration-200 transform hover:scale-105">
-                <i class="fas fa-minus-circle text-2xl mb-2"></i>
-                <p class="font-semibold">Withdraw</p>
-                <p class="text-sm opacity-90">Take money</p>
-            </a>
-            
-            <a href="{% url 'transfer' %}" class="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-lg text-center transition duration-200 transform hover:scale-105">
-                <i class="fas fa-exchange-alt text-2xl mb-2"></i>
-                <p class="font-semibold">Transfer</p>
-                <p class="text-sm opacity-90">Send money</p>
-            </a>
-            
-            <a href="{% url 'history' %}" class="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-lg text-center transition duration-200 transform hover:scale-105">
-                <i class="fas fa-history text-2xl mb-2"></i>
-                <p class="font-semibold">History</p>
-                <p class="text-sm opacity-90">View transactions</p>
-            </a>
-        </div>
-    </div>
-
-    <!-- Security Information -->
-    <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl border border-yellow-200 p-6">
-        <div class="flex items-start">
-            <i class="fas fa-shield-alt text-2xl text-yellow-600 mt-1 mr-4"></i>
-            <div>
-                <h3 class="text-lg font-semibold text-yellow-800 mb-2">Security Information</h3>
-                <ul class="text-sm text-yellow-700 space-y-1">
-                    <li>• Your account is protected with secure authentication</li>
-                    <li>• All transactions are encrypted and secure</li>
-                    <li>• Never share your login credentials with anyone</li>
-                    <li>• Contact support immediately if you notice suspicious activity</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+    </footer>
+</body>
+</html>

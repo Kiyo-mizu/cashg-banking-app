@@ -1,135 +1,244 @@
-{% extends 'base.html' %}
-
-{% block title %}Transfer - CashG Bank{% endblock %}
-
-{% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-xl shadow-lg border border-gray-200">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center">
-                <i class="fas fa-exchange-alt text-3xl text-blue-500 mr-4"></i>
-                <div>
-                    <h1 class="text-2xl font-bold text-gray-800">Transfer Money</h1>
-                    <p class="text-gray-600">Send money to another account</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer - CashG Bank</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-2xl font-bold text-primary-600">
+                            <i class="fas fa-university mr-2"></i>CashG Bank
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span class="text-gray-700">
+                        <i class="fas fa-user mr-2"></i>{{ user.username }}
+                    </span>
+                    <a href="{% url 'logout' %}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <div class="p-6">
-            <!-- Account Summary -->
-            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6 border border-blue-200">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-blue-700 font-medium">Available Balance</p>
-                        <p class="text-2xl font-bold text-blue-800">₱{{ account.balance|floatformat:2 }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-sm text-blue-700">Account Number</p>
-                        <p class="font-mono text-blue-800">{{ account.account_number }}</p>
-                    </div>
-                </div>
+    <!-- Sidebar Navigation -->
+    <div class="flex">
+        <div class="w-64 bg-white shadow-lg min-h-screen">
+            <div class="p-4">
+                <nav class="space-y-2">
+                    <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-tachometer-alt mr-3"></i>Dashboard
+                    </a>
+                    <a href="{% url 'deposit' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-plus-circle mr-3"></i>Deposit
+                    </a>
+                    <a href="{% url 'withdraw' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-minus-circle mr-3"></i>Withdraw
+                    </a>
+                    <a href="{% url 'transfer' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200 bg-primary-50 text-primary-600">
+                        <i class="fas fa-exchange-alt mr-3"></i>Transfer
+                    </a>
+                    <a href="{% url 'history' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-history mr-3"></i>Transaction History
+                    </a>
+                    <a href="{% url 'profile' %}" class="flex items-center px-4 py-2 text-gray-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg transition duration-200">
+                        <i class="fas fa-user-cog mr-3"></i>Profile
+                    </a>
+                </nav>
             </div>
+        </div>
 
-            <!-- Transfer Form -->
-            <form method="post" class="space-y-6">
-                {% csrf_token %}
-                
-                <div>
-                    <label for="recipient" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-user mr-2"></i>Recipient Username
-                    </label>
-                    <input type="text" 
-                           id="recipient" 
-                           name="recipient" 
-                           required 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                           placeholder="Enter recipient's username">
-                    <p class="text-xs text-gray-500 mt-1">Enter the exact username of the recipient</p>
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            {% if messages %}
+                <div class="mb-6">
+                    {% for message in messages %}
+                        <div class="{% if message.tags == 'error' %}bg-red-100 border-red-400 text-red-700{% else %}bg-green-100 border-green-400 text-green-700{% endif %} border px-4 py-3 rounded-lg mb-2 flex items-center">
+                            <i class="{% if message.tags == 'error' %}fas fa-exclamation-circle{% else %}fas fa-check-circle{% endif %} mr-2"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
+            {% endif %}
 
-                <div>
-                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-money-bill-wave mr-2"></i>Transfer Amount
-                    </label>
-                    <div class="relative">
-                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₱</span>
-                        <input type="number" 
-                               id="amount" 
-                               name="amount" 
-                               step="0.01" 
-                               min="200"
-                               max="50000"
-                               required 
-                               class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                               placeholder="0.00">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Transfer limits: ₱200 - ₱50,000</p>
-                </div>
-
-                <div>
-                    <label for="note" class="block text-sm font-medium text-gray-700 mb-2">
-                        <i class="fas fa-sticky-note mr-2"></i>Note (Optional)
-                    </label>
-                    <textarea id="note" 
-                              name="note" 
-                              rows="3"
-                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
-                              placeholder="Add a note for this transfer (optional)"></textarea>
-                </div>
-
-                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                    <div class="flex items-start">
-                        <i class="fas fa-info-circle text-purple-500 mt-1 mr-3"></i>
-                        <div>
-                            <h4 class="font-medium text-purple-800 mb-1">Transfer Information</h4>
-                            <ul class="text-sm text-purple-700 space-y-1">
-                                <li>• Minimum transfer: ₱200.00</li>
-                                <li>• Maximum transfer: ₱50,000.00</li>
-                                <li>• Transfers are processed immediately</li>
-                                <li>• Cannot transfer to your own account</li>
-                                <li>• Recipient must have an active account</li>
-                            </ul>
+            <div class="max-w-2xl mx-auto">
+                <!-- Header -->
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white mb-8">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exchange-alt text-4xl"></i>
+                        </div>
+                        <div class="ml-4">
+                            <h1 class="text-3xl font-bold">Transfer Funds</h1>
+                            <p class="text-blue-100">Send money to another account</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex space-x-4">
-                    <button type="submit" 
-                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105">
-                        <i class="fas fa-paper-plane mr-2"></i>Send Transfer
-                    </button>
-                    <a href="{% url 'dashboard' %}" 
-                       class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 text-center">
-                        <i class="fas fa-times mr-2"></i>Cancel
-                    </a>
+                <!-- Current Balance Card -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Available Balance</h3>
+                            <p class="text-3xl font-bold text-primary-600">₱{{ account.balance|floatformat:2 }}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-sm text-gray-600">Account Number</p>
+                            <p class="font-mono text-gray-800">{{ account.account_number }}</p>
+                        </div>
+                    </div>
                 </div>
-            </form>
+
+                <!-- Transfer Form -->
+                <div class="bg-white rounded-xl shadow-lg p-8 border border-gray-200">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-paper-plane mr-3 text-blue-500"></i>Send Money
+                    </h2>
+
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        
+                        <div>
+                            <label for="recipient_account" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-user mr-2"></i>Recipient Account Number
+                            </label>
+                            <input type="text" 
+                                   id="recipient_account" 
+                                   name="recipient_account" 
+                                   required 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                   placeholder="Enter recipient's account number">
+                            <p class="text-xs text-gray-500 mt-1">Enter the account number of the person you want to send money to</p>
+                        </div>
+
+                        <div>
+                            <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-coins mr-2"></i>Transfer Amount
+                            </label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">
+                                    ₱
+                                </span>
+                                <input type="number" 
+                                       id="amount" 
+                                       name="amount" 
+                                       required 
+                                       min="1"
+                                       max="{{ account.balance }}"
+                                       step="0.01"
+                                       class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                       placeholder="Enter amount">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Maximum transfer: ₱{{ account.balance|floatformat:2 }}</p>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-sticky-note mr-2"></i>Description (Optional)
+                            </label>
+                            <textarea id="description" 
+                                      name="description" 
+                                      rows="3"
+                                      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                                      placeholder="Add a note about this transfer"></textarea>
+                        </div>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-blue-500 mt-1 mr-3"></i>
+                                <div>
+                                    <h4 class="font-medium text-blue-800">Transfer Information</h4>
+                                    <ul class="text-sm text-blue-700 mt-2 space-y-1">
+                                        <li>• Transfers are processed immediately</li>
+                                        <li>• No fees for transfers</li>
+                                        <li>• You can only transfer up to your available balance</li>
+                                        <li>• Both accounts must be active</li>
+                                        <li>• Transaction will be recorded in both accounts' history</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex space-x-4">
+                            <button type="submit" 
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105">
+                                <i class="fas fa-paper-plane mr-2"></i>Send Transfer
+                            </button>
+                            <a href="{% url 'dashboard' %}" 
+                               class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 text-center">
+                                <i class="fas fa-times mr-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Quick Amount Buttons -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-yellow-500"></i>Quick Amounts
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <button onclick="setAmount(100)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition duration-200">
+                            ₱100
+                        </button>
+                        <button onclick="setAmount(500)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition duration-200">
+                            ₱500
+                        </button>
+                        <button onclick="setAmount(1000)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition duration-200">
+                            ₱1,000
+                        </button>
+                        <button onclick="setAmount(5000)" class="bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition duration-200">
+                            ₱5,000
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Quick Amount Buttons -->
-    <div class="mt-6 bg-white rounded-lg shadow-md border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Amounts</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <button onclick="setAmount(500)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
-                ₱500
-            </button>
-            <button onclick="setAmount(1000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
-                ₱1,000
-            </button>
-            <button onclick="setAmount(5000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
-                ₱5,000
-            </button>
-            <button onclick="setAmount(10000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
-                ₱10,000
-            </button>
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-gray-500 text-sm">
+                <p>&copy; 2024 CashG Bank. All rights reserved.</p>
+            </div>
         </div>
-    </div>
-</div>
+    </footer>
 
-<script>
-function setAmount(amount) {
-    document.getElementById('amount').value = amount;
-}
-</script>
-{% endblock %}
+    <script>
+        function setAmount(amount) {
+            const maxAmount = {{ account.balance }};
+            if (amount > maxAmount) {
+                amount = maxAmount;
+            }
+            document.getElementById('amount').value = amount;
+        }
+    </script>
+</body>
+</html>
