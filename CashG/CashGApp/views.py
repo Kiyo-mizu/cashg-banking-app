@@ -3,11 +3,10 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from .models import *
 from decimal import Decimal
-from django.contrib.auth.models import User 
-from django.contrib.auth.decorators import login_required  
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 import random
-
 from django.views.decorators.csrf import csrf_protect
 
 
@@ -31,14 +30,16 @@ def Login(request):
 
     return render(request, 'login.html')
 
+
 @login_required
 def dashboard(request):
     return render(request, 'dashboard.html')
 
+
 @csrf_protect
 @transaction.atomic
 def signup(request):
-     if request.method == 'POST':
+    if request.method == 'POST':
         username = request.POST.get('username')
         account_type = request.POST.get('account_type')
         password = request.POST.get('password')
@@ -59,7 +60,9 @@ def signup(request):
         Profile.objects.create(user=user, account_type=account_type)
         messages.success(request, "Account created successfully. You can now login.")
         return redirect('login')
+
     return render(request, 'sign_up.html')
+
 
 @login_required
 @csrf_protect
@@ -91,6 +94,7 @@ def deposit(request):
             messages.error(request, "Invalid amount format.")
 
     return render(request, 'deposit.html', {'account': account})
+
 
 @login_required
 @csrf_protect
@@ -124,6 +128,7 @@ def withdraw(request):
             messages.error(request, "Invalid amount format.")
 
     return render(request, 'withdraw.html')
+
 
 @login_required
 @csrf_protect
@@ -193,7 +198,8 @@ def transfer(request):
             return redirect('dashboard')
 
     return render(request, 'transfer.html')
-    
+
+
 @login_required
 def history(request):
     try:
@@ -201,6 +207,6 @@ def history(request):
     except Account.DoesNotExist:
         messages.error(request, "Account not found.")
         return redirect('dashboard')
-        
+
     transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:10]
     return render(request, 'transactions.html', {'transactions': transactions})
