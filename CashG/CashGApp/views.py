@@ -8,6 +8,12 @@ from django.contrib.auth.decorators import login_required
 from django.db import transaction
 import random
 from django.views.decorators.csrf import csrf_protect
+from django.http import HttpResponse
+
+
+def test_view(request):
+    """Simple test view to check if the server is working"""
+    return HttpResponse("CashG Bank is working! Server is running properly.")
 
 
 @csrf_protect

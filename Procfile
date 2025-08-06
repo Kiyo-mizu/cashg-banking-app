@@ -1,0 +1,1 @@
+web: gunicorn CashG.CashG.wsgi:application 
