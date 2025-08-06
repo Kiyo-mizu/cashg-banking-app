@@ -1,34 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Withdraw</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+{% extends 'base.html' %}
 
-  <form method="post" class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-    {% csrf_token %}
-    <h2 class="text-2xl font-semibold text-center mb-6">Withdraw Funds</h2>
-    <a href="{% url 'dashboard' %}" class="text-blue-500 hover:underline">← Back to Dashboard</a>
+{% block title %}Withdraw - CashG Bank{% endblock %}
 
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center">
+                <i class="fas fa-minus-circle text-3xl text-red-500 mr-4"></i>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Withdraw Money</h1>
+                    <p class="text-gray-600">Take funds from your account</p>
+                </div>
+            </div>
+        </div>
 
-    {% if messages %}
-      <div class="mb-4">
-        {% for message in messages %}
-          <div class="text-sm text-red-600">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+        <div class="p-6">
+            <!-- Account Summary -->
+            <div class="bg-gradient-to-r from-red-50 to-pink-50 rounded-lg p-4 mb-6 border border-red-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-red-700 font-medium">Available Balance</p>
+                        <p class="text-2xl font-bold text-red-800">₱{{ account.balance|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-red-700">Account Number</p>
+                        <p class="font-mono text-red-800">{{ account.account_number }}</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="mb-4">
-      <label for="amount" class="block text-gray-700 mb-1">Amount</label>
-      <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+            <!-- Withdraw Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-money-bill-wave mr-2"></i>Withdrawal Amount
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₱</span>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               step="0.01" 
+                               min="200"
+                               max="50000"
+                               required 
+                               class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition duration-200"
+                               placeholder="0.00">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Withdrawal limits: ₱200 - ₱50,000</p>
+                </div>
+
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-medium text-yellow-800 mb-1">Withdrawal Information</h4>
+                            <ul class="text-sm text-yellow-700 space-y-1">
+                                <li>• Minimum withdrawal: ₱200.00</li>
+                                <li>• Maximum withdrawal: ₱50,000.00</li>
+                                <li>• Withdrawals are processed immediately</li>
+                                <li>• Ensure sufficient balance before withdrawal</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="submit" 
+                            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105">
+                        <i class="fas fa-check mr-2"></i>Confirm Withdrawal
+                    </button>
+                    <a href="{% url 'dashboard' %}" 
+                       class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 text-center">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <button type="submit" class="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition duration-300">Withdraw</button>
-  </form>
+    <!-- Quick Amount Buttons -->
+    <div class="mt-6 bg-white rounded-lg shadow-md border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Amounts</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onclick="setAmount(500)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱500
+            </button>
+            <button onclick="setAmount(1000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱1,000
+            </button>
+            <button onclick="setAmount(5000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱5,000
+            </button>
+            <button onclick="setAmount(10000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱10,000
+            </button>
+        </div>
+    </div>
+</div>
 
-</body>
-</html>
+<script>
+function setAmount(amount) {
+    document.getElementById('amount').value = amount;
+}
+</script>
+{% endblock %}

@@ -1,42 +1,135 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Transfer</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
+{% extends 'base.html' %}
 
-  <form method="post" class="bg-white p-8 rounded-lg shadow-md w-full max-w-sm">
-    {% csrf_token %}
-    <h2 class="text-2xl font-semibold text-center mb-6">Transfer Funds</h2>
-    <a href="{% url 'dashboard' %}" class="text-blue-500 hover:underline">← Back to Dashboard</a>
+{% block title %}Transfer - CashG Bank{% endblock %}
 
-    {% if messages %}
-      <div class="mb-4">
-        {% for message in messages %}
-          <div class="text-sm text-red-600">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center">
+                <i class="fas fa-exchange-alt text-3xl text-blue-500 mr-4"></i>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">Transfer Money</h1>
+                    <p class="text-gray-600">Send money to another account</p>
+                </div>
+            </div>
+        </div>
 
-    <div class="mb-4">
-      <label for="recipient" class="block text-gray-700 mb-1">Recipient Username</label>
-      <input type="text" name="recipient" id="recipient" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+        <div class="p-6">
+            <!-- Account Summary -->
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6 border border-blue-200">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-blue-700 font-medium">Available Balance</p>
+                        <p class="text-2xl font-bold text-blue-800">₱{{ account.balance|floatformat:2 }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-blue-700">Account Number</p>
+                        <p class="font-mono text-blue-800">{{ account.account_number }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="recipient" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-user mr-2"></i>Recipient Username
+                    </label>
+                    <input type="text" 
+                           id="recipient" 
+                           name="recipient" 
+                           required 
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                           placeholder="Enter recipient's username">
+                    <p class="text-xs text-gray-500 mt-1">Enter the exact username of the recipient</p>
+                </div>
+
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-money-bill-wave mr-2"></i>Transfer Amount
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-medium">₱</span>
+                        <input type="number" 
+                               id="amount" 
+                               name="amount" 
+                               step="0.01" 
+                               min="200"
+                               max="50000"
+                               required 
+                               class="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                               placeholder="0.00">
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">Transfer limits: ₱200 - ₱50,000</p>
+                </div>
+
+                <div>
+                    <label for="note" class="block text-sm font-medium text-gray-700 mb-2">
+                        <i class="fas fa-sticky-note mr-2"></i>Note (Optional)
+                    </label>
+                    <textarea id="note" 
+                              name="note" 
+                              rows="3"
+                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                              placeholder="Add a note for this transfer (optional)"></textarea>
+                </div>
+
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-purple-500 mt-1 mr-3"></i>
+                        <div>
+                            <h4 class="font-medium text-purple-800 mb-1">Transfer Information</h4>
+                            <ul class="text-sm text-purple-700 space-y-1">
+                                <li>• Minimum transfer: ₱200.00</li>
+                                <li>• Maximum transfer: ₱50,000.00</li>
+                                <li>• Transfers are processed immediately</li>
+                                <li>• Cannot transfer to your own account</li>
+                                <li>• Recipient must have an active account</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="submit" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105">
+                        <i class="fas fa-paper-plane mr-2"></i>Send Transfer
+                    </button>
+                    <a href="{% url 'dashboard' %}" 
+                       class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 text-center">
+                        <i class="fas fa-times mr-2"></i>Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 
-    <div class="mb-4">
-      <label for="amount" class="block text-gray-700 mb-1">Amount</label>
-      <input type="number" name="amount" id="amount" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required>
+    <!-- Quick Amount Buttons -->
+    <div class="mt-6 bg-white rounded-lg shadow-md border border-gray-200 p-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Amounts</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button onclick="setAmount(500)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱500
+            </button>
+            <button onclick="setAmount(1000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱1,000
+            </button>
+            <button onclick="setAmount(5000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱5,000
+            </button>
+            <button onclick="setAmount(10000)" class="bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition duration-200">
+                ₱10,000
+            </button>
+        </div>
     </div>
-    <div class="mb-4">
-      <label for="note" class="block text-gray-700 mb-1">Note</label>
-      <input type="text" name="note" id="note" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" placeholder="Optional" required>
-    </div>
+</div>
 
-    <button type="submit" class="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600 transition duration-300">Transfer</button>
-  </form>
-
-</body>
-</html>
+<script>
+function setAmount(amount) {
+    document.getElementById('amount').value = amount;
+}
+</script>
+{% endblock %}

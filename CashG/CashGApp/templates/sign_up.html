@@ -1,33 +1,118 @@
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="container mt-5">
-    <h2>Create an Account</h2>
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+{% block title %}Sign Up - CashG Bank{% endblock %}
 
-    <form method="POST">
+{% block content %}
+<div class="bg-white rounded-xl shadow-2xl p-8 border border-gray-200">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Create Account</h2>
+        <p class="text-gray-600">Join CashG Bank for secure banking</p>
+    </div>
+
+    <form method="post" class="space-y-6">
         {% csrf_token %}
-        <div class="mb-3">
-            <label for="username" class="form-label">Username</label>
-            <input type="text" name="username" class="form-control" required>
+        
+        <div>
+            <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-user mr-2"></i>Username
+            </label>
+            <input type="text" 
+                   id="username" 
+                   name="username" 
+                   required 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-200"
+                   placeholder="Choose a username">
         </div>
-        <div class="mb-3">
-            <label for="account_type" class="form-label">Account Type</label>
-            <select name="account_type" class="form-control" required>
-                <option value="">-- Select --</option>
+
+        <div>
+            <label for="account_type" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-users mr-2"></i>Account Type
+            </label>
+            <select id="account_type" 
+                    name="account_type" 
+                    required 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-200">
+                <option value="">Select account type</option>
                 <option value="Client">Client</option>
                 <option value="Admin">Admin</option>
             </select>
         </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" name="password" class="form-control" required>
+
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-lock mr-2"></i>Password
+            </label>
+            <input type="password" 
+                   id="password" 
+                   name="password" 
+                   required 
+                   minlength="8"
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-200"
+                   placeholder="Create a password (min 8 characters)">
+            <p class="text-xs text-gray-500 mt-1">Password must be at least 8 characters long</p>
         </div>
-        <button type="submit" class="btn btn-primary">Sign Up</button>
+
+        <div>
+            <label for="confirm_password" class="block text-sm font-medium text-gray-700 mb-2">
+                <i class="fas fa-lock mr-2"></i>Confirm Password
+            </label>
+            <input type="password" 
+                   id="confirm_password" 
+                   name="confirm_password" 
+                   required 
+                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition duration-200"
+                   placeholder="Confirm your password">
+        </div>
+
+        <button type="submit" 
+                class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 transform hover:scale-105">
+            <i class="fas fa-user-plus mr-2"></i>Create Account
+        </button>
     </form>
+
+    <div class="mt-6 text-center">
+        <p class="text-gray-600">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="text-primary-600 hover:text-primary-700 font-medium">
+                Sign in here
+            </a>
+        </p>
+    </div>
+
+    <div class="mt-8 pt-6 border-t border-gray-200">
+        <div class="text-center">
+            <p class="text-sm text-gray-500 mb-4">Your security is our priority</p>
+            <div class="flex items-center justify-center space-x-4 text-gray-400">
+                <i class="fas fa-shield-alt text-lg"></i>
+                <i class="fas fa-lock text-lg"></i>
+                <i class="fas fa-user-shield text-lg"></i>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Password confirmation validation
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (password !== confirmPassword) {
+        this.setCustomValidity('Passwords do not match');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+
+document.getElementById('password').addEventListener('input', function() {
+    const confirmPassword = document.getElementById('confirm_password');
+    if (confirmPassword.value) {
+        if (this.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+});
+</script>
 {% endblock %}
