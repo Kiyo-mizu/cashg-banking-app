@@ -19,5 +19,5 @@ from django.urls import path,include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('cashg/',include('CashGApp.urls'))
+    path('',include('CashGApp.urls'))
 ]
