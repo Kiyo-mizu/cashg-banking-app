@@ -60,6 +60,7 @@ def dashboard(request):
     return render(request, 'dashboard.html', context)
 
 
+
 @csrf_protect
 @transaction.atomic
 def signup(request):
@@ -95,10 +96,7 @@ def signup(request):
             # Create user
             user = User.objects.create_user(username=username, password=password1)
             
-            # Create Profile with matching account_type choices
-            Profile.objects.create(user=user, account_type=account_type)
-            
-            # Create Account - map the profile account_type to model choices
+            # Create Account - map the account_type to model choices
             django_account_type = 'SAVINGS' if account_type == 'Client' else 'CHECKING'
             Account.objects.create(
                 user=user,
