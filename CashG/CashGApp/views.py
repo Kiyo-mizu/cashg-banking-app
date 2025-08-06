@@ -162,36 +162,65 @@ def deposit(request):
 @login_required
 @csrf_protect
 def withdraw(request):
-    try:
-        account = Account.objects.select_for_update().get(user=request.user)
-    except Account.DoesNotExist:
-        messages.error(request, "Account not found.")
-        return redirect('dashboard')
-
-    if request.method == 'POST':
+    # For GET requests, we don't need select_for_update
+    if request.method == 'GET':
+        try:
+            account = Account.objects.get(user=request.user)
+        except Account.DoesNotExist:
+            messages.error(request, "Account not found.")
+            return redirect('dashboard')
+        return render(request, 'withdraw.html', {'account': account})
+    
+    # For POST requests, we need select_for_update inside a transaction
+    elif request.method == 'POST':
         amount_str = request.POST.get('amount')
+        description = request.POST.get('description', '')
+        
         try:
             amount = Decimal(amount_str)
-            if amount > account.balance:
-                messages.error(request, "Insufficient balance.")
-            elif 200.00 <= amount <= 50000.00:
-                with transaction.atomic():
-                    account.balance -= amount
-                    account.save()
-                    Transaction.objects.create(
-                        account=account,
-                        amount=amount,
-                        transaction_type='WITHDRAWAL',
-                        description=f'Withdrawal from {account.account_type} account'
-                    )
-                messages.success(request, f"Successfully withdrew ₱{amount:,.2f}.")
-                return redirect('dashboard')
-            else:
+            
+            # Validate amount range
+            if not (200.00 <= amount <= 50000.00):
                 messages.error(request, "Withdrawal must be between ₱200 and ₱50,000.")
+                # Get account for re-rendering the form
+                account = Account.objects.get(user=request.user)
+                return render(request, 'withdraw.html', {'account': account})
+            
+            # Use atomic transaction for the withdrawal
+            with transaction.atomic():
+                account = Account.objects.select_for_update().get(user=request.user)
+                
+                # Check sufficient balance
+                if amount > account.balance:
+                    messages.error(request, "Insufficient balance.")
+                    return render(request, 'withdraw.html', {'account': account})
+                
+                # Process withdrawal
+                account.balance -= amount
+                account.save()
+                
+                # Create transaction record
+                Transaction.objects.create(
+                    account=account,
+                    amount=amount,
+                    transaction_type='WITHDRAWAL',
+                    description=description if description else f'Withdrawal from {account.account_type} account'
+                )
+                
+            messages.success(request, f"Successfully withdrew ₱{amount:,.2f}.")
+            return redirect('dashboard')
+            
+        except Account.DoesNotExist:
+            messages.error(request, "Account not found.")
+            return redirect('dashboard')
         except (ValueError, TypeError, Decimal.InvalidOperation):
             messages.error(request, "Invalid amount format.")
-
-    return render(request, 'withdraw.html', {'account': account})
+            # Get account for re-rendering the form
+            try:
+                account = Account.objects.get(user=request.user)
+                return render(request, 'withdraw.html', {'account': account})
+            except Account.DoesNotExist:
+                return redirect('dashboard')
 
 
 @login_required
