@@ -218,3 +218,14 @@ def transfer(request):
             return redirect('dashboard')
 
     return render(request, 'transfer.html')
+    
+@login_required
+def history(request):
+    try:
+        account = Account.objects.get(user=request.user)
+    except Account.DoesNotExist:
+        messages.error(request, "Account not found.")
+        return redirect('dashboard')
+        
+    transactions = Transaction.objects.filter(account=account).order_by('-timestamp')[:10]
+    return render(request, 'transactions.html', {'transactions': transactions})
